@@ -1,3 +1,44 @@
 body {
 	font-family: 'Alegreya', serif;
+	font-size: 18px;
+}
+
+h1.title {
+	font-size: 5em;
+}
+
+.line {
+	cursor: pointer;
+}
+
+.line > .line-label {
+	font-family: Calibri, Tahoma, Arial, sans-serif;
+	font-weight: bold;
+	color: dimgray;
+	position: absolute;
+	left: -30px;
+	margin-top: 3px;
+}
+
+.fake > .line.highlight {
+	background-color: #e5e5e5;
+}
+
+.fake {
+	padding-top: 10px;
+	padding-bottom: 10px;
+	padding-right: 0;
+}
+
+.real {
+	color: dimgray;
+	background-color: #e5e5e5;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	padding-left: 10px;
+}
+
+.real > .line.highlight {
+	color: black;
+	font-weight: bold;
 }
