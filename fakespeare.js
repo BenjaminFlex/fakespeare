@@ -15,10 +15,23 @@
 			sonnets = data;
 			sonnetsCount = data[0].length;
 
+			var match = location.href.match(/s=(.+)/);
+
+			if (match && match[1]) {
+				var initial = decode(match[1]);
+
+				if (initial && Array.isArray(initial) && initial.length === 7) {
+					return generate(initial);
+				}
+			}
+
 			generate();
 		});
 
-		$('#generate').click(generate);
+		$('#generate').click(function () {
+			// We don't want the event object to be passed in to generate.
+			generate();
+		});
 		$('#real').hide();
 
 		for (var i = 0; i < 14; i++) {
@@ -78,18 +91,25 @@
 
 	/**
 	 * Generates a new sonnet.
+	 * @param {Number[]} initial An initial pick to use.
 	 */
-	function generate() {
+	function generate(initial) {
 		var pick = [],
 			picked = 0;
 
-		while (picked < 7) {
-			var sonnetNumber = Math.floor(Math.random() * sonnetsCount);
+		if (!initial) {
+			while (picked < 7) {
+				var sonnetNumber = Math.floor(Math.random() * sonnetsCount);
 
-			if (sonnets[0][sonnetNumber] !== '') {
-				pick[picked] = sonnetNumber;
-				picked++;
+				if (sonnets[0][sonnetNumber] !== '') {
+					pick[picked] = sonnetNumber;
+					picked++;
+				}
 			}
+
+			history.pushState(null, null, '?s=' + encode(pick));
+		} else {
+			pick = initial;
 		}
 
 		lineRhymes.forEach(function (rhymeNumber, line) {
@@ -102,5 +122,27 @@
 
 			currentSonnet[line] = pick[rhymeNumber];
 		});
+	}
+
+	/**
+	 * Encodes an array of sonnet numbers into a string.
+	 * @param {Number[]} sonnets The sonnets.
+	 * @returns {String} The encoded string.
+	 */
+	function encode(sonnets) {
+		return btoa(sonnets.reduce(function (m, c) { return m + String.fromCharCode(c); }, '')).replace(/=/g, '');
+	}
+
+	/**
+	 * Decodes an encoded sonnet string.
+	 * @param {String} code The encoded string.
+	 * @returns {Number[]} An array of sonnet numbers.
+	 */
+	function decode(code) {
+		try {
+			return atob(code).split('').map(function (c) { return c.charCodeAt(0); });
+		} catch (e) {
+			return null;
+		}
 	}
 })();
