@@ -15,23 +15,35 @@
 			sonnets = data;
 			sonnetsCount = data[0].length;
 
-			var match = location.href.match(/s=(.+)/);
+			var match = location.href.match(/s=(.+)/),
+				pick;
 
 			if (match && match[1]) {
 				var initial = decode(match[1]);
 
 				if (initial && Array.isArray(initial) && initial.length === 7) {
-					return generate(initial);
+					pick = generate(initial);
+				} else {
+					pick = generate();
 				}
+			} else {
+				pick = generate();
 			}
 
-			generate();
+			// When the generate was automatic, we replace the history state.
+			history.replaceState({ picked: pick }, null, '?s=' + encode(pick));
 		});
 
 		$('#generate').click(function () {
 			// We don't want the event object to be passed in to generate.
-			generate();
+			var pick = generate();
+			// When the generate was a mouse click, we want a new history state.
+			history.pushState({ picked: pick }, null, '?s=' + encode(pick));
 		});
+		window.onpopstate = function (event) {
+			// When the history pops, load the pick from the state.
+			generate(event.state.picked);
+		};
 		$('#real').hide();
 
 		for (var i = 0; i < 14; i++) {
@@ -91,7 +103,7 @@
 
 	/**
 	 * Generates a new sonnet.
-	 * @param {Number[]} initial An initial pick to use.
+	 * @param {Number[]} [initial] An initial pick to use.
 	 */
 	function generate(initial) {
 		var pick = [],
@@ -106,8 +118,6 @@
 					picked++;
 				}
 			}
-
-			history.pushState(null, null, '?s=' + encode(pick));
 		} else {
 			pick = initial;
 		}
@@ -122,6 +132,8 @@
 
 			currentSonnet[line] = pick[rhymeNumber];
 		});
+
+		return pick;
 	}
 
 	/**
